@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Pacevite.Api/Pacevite.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Pacevite.Api.Tests/Pacevite.Api.Tests.csproj" />
+  </Folder>
+</Solution>

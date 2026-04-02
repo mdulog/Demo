@@ -1,0 +1,78 @@
+[
+  {
+    "event_type": "MARATHON",
+    "event_name": "Berlin Marathon 2025",
+    "event_date": "2025-09-28",
+    "completion": "FINISHED",
+    "elapsed_secs": 13284,
+    "overall_rank": 1842,
+    "field_size": 47000,
+    "ag_rank": 214,
+    "ag_field_size": 3100,
+    "location": {
+      "city": "Berlin",
+      "country": "Germany"
+    },
+    "splits": [
+      { "split_type": "DISTANCE", "split_label": "5km",   "split_secs": 1560, "cumulative_secs": 1560 },
+      { "split_type": "DISTANCE", "split_label": "10km",  "split_secs": 1572, "cumulative_secs": 3132 },
+      { "split_type": "DISTANCE", "split_label": "Half",  "split_secs": 3348, "cumulative_secs": 6480 },
+      { "split_type": "DISTANCE", "split_label": "30km",  "split_secs": 1680, "cumulative_secs": 9924 },
+      { "split_type": "DISTANCE", "split_label": "Finish","split_secs": 3360, "cumulative_secs": 13284 }
+    ]
+  },
+  {
+    "event_type": "HYROX",
+    "event_name": "HYROX London 2025",
+    "event_date": "2025-03-15",
+    "completion": "FINISHED",
+    "elapsed_secs": 4680,
+    "overall_rank": 312,
+    "field_size": 1200,
+    "location": {
+      "city": "London",
+      "country": "UK",
+      "venue": "ExCeL London"
+    },
+    "splits": [
+      { "split_type": "STATION", "split_label": "Run 1",        "split_secs": 330,  "cumulative_secs": 330  },
+      { "split_type": "STATION", "split_label": "SkiErg",       "split_secs": 285,  "cumulative_secs": 615  },
+      { "split_type": "STATION", "split_label": "Run 2",        "split_secs": 345,  "cumulative_secs": 960  },
+      { "split_type": "STATION", "split_label": "Sled Push",    "split_secs": 420,  "cumulative_secs": 1380 },
+      { "split_type": "STATION", "split_label": "Run 3",        "split_secs": 360,  "cumulative_secs": 1740 },
+      { "split_type": "STATION", "split_label": "Sled Pull",    "split_secs": 390,  "cumulative_secs": 2130 },
+      { "split_type": "STATION", "split_label": "Run 4",        "split_secs": 375,  "cumulative_secs": 2505 },
+      { "split_type": "STATION", "split_label": "Burpee Jumps", "split_secs": 300,  "cumulative_secs": 2805 },
+      { "split_type": "STATION", "split_label": "Run 5",        "split_secs": 390,  "cumulative_secs": 3195 },
+      { "split_type": "STATION", "split_label": "Rowing",       "split_secs": 315,  "cumulative_secs": 3510 },
+      { "split_type": "STATION", "split_label": "Run 6",        "split_secs": 405,  "cumulative_secs": 3915 },
+      { "split_type": "STATION", "split_label": "Farmers Carry","split_secs": 255,  "cumulative_secs": 4170 },
+      { "split_type": "STATION", "split_label": "Run 7",        "split_secs": 270,  "cumulative_secs": 4440 },
+      { "split_type": "STATION", "split_label": "Wall Balls",   "split_secs": 240,  "cumulative_secs": 4680 }
+    ]
+  },
+  {
+    "event_type": "SPARTAN",
+    "event_name": "Spartan Beast Edinburgh 2024",
+    "event_date": "2024-08-10",
+    "completion": "FINISHED",
+    "elapsed_secs": 16920,
+    "overall_rank": 89,
+    "field_size": 540,
+    "location": {
+      "city": "Edinburgh",
+      "country": "Scotland"
+    },
+    "metadata": {
+      "distance_km": "20",
+      "obstacles": "30",
+      "penalty_burpees": "30"
+    },
+    "splits": [
+      { "split_type": "CHECKPOINT", "split_label": "CP1 ~5km",  "split_secs": 3240, "cumulative_secs": 3240  },
+      { "split_type": "CHECKPOINT", "split_label": "CP2 ~10km", "split_secs": 4020, "cumulative_secs": 7260  },
+      { "split_type": "CHECKPOINT", "split_label": "CP3 ~15km", "split_secs": 4560, "cumulative_secs": 11820 },
+      { "split_type": "CHECKPOINT", "split_label": "Finish",    "split_secs": 5100, "cumulative_secs": 16920 }
+    ]
+  }
+]

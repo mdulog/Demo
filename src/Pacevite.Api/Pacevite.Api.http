@@ -1,0 +1,6 @@
+@Pacevite.Api_HostAddress = http://localhost:5291
+
+GET {{Pacevite.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
