@@ -26,7 +26,7 @@ public sealed class ChatToolExecutor(
         catch (Exception ex)
         {
             logger.LogCritical(ex, "Tool handler {ToolName} threw for user {UserId}", toolName, userId);
-            return $"Tool {toolName} failed: {ex.Message}";
+            return $"Tool {toolName} failed. See application logs for details.";
         }
     }
 }
