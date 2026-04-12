@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
@@ -19,6 +18,8 @@ public sealed class FetchTrainingTipsToolHandler(
         "www.verywellfit.com",
     };
 
+    private static readonly Regex WhitespacePattern = new(@"\s+", RegexOptions.Compiled);
+
     private const int MaxResultLength = 3000;
 
     public FetchTrainingTipsToolHandler(HttpClient httpClient)
@@ -32,19 +33,13 @@ public sealed class FetchTrainingTipsToolHandler(
         {
             var url = new Uri($"https://www.runnersworld.com/search?q={Uri.EscapeDataString(query)}");
 
+            // SSRF protection (OWASP A10): validate URL host before every request.
+            // The URL is currently constructed from a hardcoded base domain, but this guard
+            // ensures the check remains enforced if URL construction is ever refactored.
             if (!AllowedHosts.Contains(url.Host))
                 return "No results found: domain not permitted.";
 
-            HttpResponseMessage response;
-            try
-            {
-                response = await httpClient.GetAsync(url, ct);
-            }
-            catch (HttpRequestException ex)
-            {
-                logger.LogCritical(ex, "{Method} failed for query {Query}", nameof(ExecuteAsync), query);
-                throw;
-            }
+            var response = await httpClient.GetAsync(url, ct);
 
             if (!response.IsSuccessStatusCode)
                 return "No results found.";
@@ -58,7 +53,7 @@ public sealed class FetchTrainingTipsToolHandler(
                 node.Remove();
 
             var text = doc.DocumentNode.InnerText;
-            text = Regex.Replace(text, @"\s+", " ").Trim();
+            text = WhitespacePattern.Replace(text, " ").Trim();
 
             if (string.IsNullOrWhiteSpace(text))
                 return "No results found.";

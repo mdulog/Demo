@@ -4,6 +4,10 @@ using Pacevite.Api.Infrastructure.Chat.Tools;
 
 namespace Pacevite.Api.Tests.Unit.Chat;
 
+// Note: The SSRF domain allowlist guard (returns "No results found: domain not permitted.")
+// cannot be tested via the public ExecuteAsync interface since the URL is constructed
+// internally from a hardcoded base domain. The guard is present for future-proofing
+// when URL construction may accept external input.
 [Category("Unit")]
 public sealed class FetchTrainingTipsToolHandlerTests
 {

@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
@@ -19,6 +18,8 @@ public sealed class ScrapeRaceResultsToolHandler(
         "www.spartanrace.com",
     };
 
+    private static readonly Regex WhitespacePattern = new(@"\s+", RegexOptions.Compiled);
+
     private const int MaxResultLength = 3000;
 
     public ScrapeRaceResultsToolHandler(HttpClient httpClient)
@@ -31,25 +32,19 @@ public sealed class ScrapeRaceResultsToolHandler(
 
         try
         {
-            var query = year.HasValue
-                ? $"{Uri.EscapeDataString(raceName)} {year.Value} results"
-                : $"{Uri.EscapeDataString(raceName)} results";
+            var queryText = year.HasValue
+                ? $"{raceName} {year.Value} results"
+                : $"{raceName} results";
 
-            var url = new Uri($"https://www.worldathletics.org/search?q={query}");
+            var url = new Uri($"https://www.worldathletics.org/search?q={Uri.EscapeDataString(queryText)}");
 
+            // SSRF protection (OWASP A10): validate URL host before every request.
+            // The URL is currently constructed from a hardcoded base domain, but this guard
+            // ensures the check remains enforced if URL construction is ever refactored.
             if (!AllowedHosts.Contains(url.Host))
                 return "No results found: domain not permitted.";
 
-            HttpResponseMessage response;
-            try
-            {
-                response = await httpClient.GetAsync(url, ct);
-            }
-            catch (HttpRequestException ex)
-            {
-                logger.LogCritical(ex, "{Method} failed for race {RaceName}", nameof(ExecuteAsync), raceName);
-                throw;
-            }
+            var response = await httpClient.GetAsync(url, ct);
 
             if (!response.IsSuccessStatusCode)
                 return "No results found.";
@@ -63,7 +58,7 @@ public sealed class ScrapeRaceResultsToolHandler(
                 node.Remove();
 
             var text = doc.DocumentNode.InnerText;
-            text = Regex.Replace(text, @"\s+", " ").Trim();
+            text = WhitespacePattern.Replace(text, " ").Trim();
 
             if (string.IsNullOrWhiteSpace(text))
                 return "No results found.";
