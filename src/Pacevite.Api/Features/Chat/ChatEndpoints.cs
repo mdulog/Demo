@@ -7,9 +7,16 @@ namespace Pacevite.Api.Features.Chat;
 
 public static class ChatEndpoints
 {
+    private const int MaxMessageLength = 2000;
+    private const string ContentTypeEventStream = "text/event-stream";
+    private const string RoleUser = "user";
+    private const string RoleAssistant = "assistant";
+
     public static IEndpointRouteBuilder MapChatEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/message", StreamMessageAsync).WithName("ChatMessage");
+        app.MapPost("/message", StreamMessageAsync)
+            .WithName("ChatMessage")
+            .RequireAuthorization();
         return app;
     }
 
@@ -17,17 +24,19 @@ public static class ChatEndpoints
         SendMessageRequest request,
         ClaimsPrincipal user,
         IMediator mediator,
+        ILoggerFactory loggerFactory,
         HttpResponse response,
         CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(request.Message) || request.Message.Length > 2000)
+        var logger = loggerFactory.CreateLogger(nameof(ChatEndpoints));
+        if (string.IsNullOrWhiteSpace(request.Message) || request.Message.Length > MaxMessageLength)
         {
             response.StatusCode = StatusCodes.Status400BadRequest;
             await response.WriteAsJsonAsync(new { error = "Message must be 1–2000 characters." }, ct);
             return;
         }
 
-        if (request.History.Any(m => m.Role is not "user" and not "assistant"))
+        if (request.History is not null && request.History.Any(m => m.Role is not RoleUser and not RoleAssistant))
         {
             response.StatusCode = StatusCodes.Status400BadRequest;
             await response.WriteAsJsonAsync(new { error = "History roles must be 'user' or 'assistant'." }, ct);
@@ -38,11 +47,10 @@ public static class ChatEndpoints
             ?? user.FindFirstValue("sub")
             ?? throw new InvalidOperationException("User ID claim missing from token.");
 
-        response.ContentType = "text/event-stream";
+        response.ContentType = ContentTypeEventStream;
         response.Headers.CacheControl = "no-cache";
-        response.Headers.Connection = "keep-alive";
 
-        var query = new SendMessageQuery(userId, request.Message, request.History);
+        var query = new SendMessageQuery(userId, request.Message, request.History ?? []);
 
         try
         {
@@ -56,8 +64,9 @@ public static class ChatEndpoints
         {
             // Client disconnected — no action needed
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            logger.LogCritical(ex, "Unhandled exception in {Method} for user {UserId}", nameof(StreamMessageAsync), userId);
             var errorPayload = JsonSerializer.Serialize(new { message = "An error occurred. Please try again." });
             await response.WriteAsync($"event: error\ndata: {errorPayload}\n\n", ct);
             await response.Body.FlushAsync(ct);
