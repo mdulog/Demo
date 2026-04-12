@@ -2,7 +2,6 @@ using System.Security.Claims;
 using System.Text.Json;
 using Mediator;
 using Pacevite.Api.Contracts.Requests;
-using Pacevite.Api.Infrastructure.Chat;
 
 namespace Pacevite.Api.Features.Chat;
 
