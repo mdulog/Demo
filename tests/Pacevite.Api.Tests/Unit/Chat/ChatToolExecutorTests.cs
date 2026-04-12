@@ -43,7 +43,7 @@ public sealed class ChatToolExecutorTests
     }
 
     [Test]
-    public async Task ExecuteAsync_KnownTool_PassesInputToHandler()
+    public async Task ExecuteAsync_KnownTool_PassesInputAndUserId()
     {
         var stub = new StubHandler();
         var executor = new ChatToolExecutor(new Dictionary<string, IChatToolHandler>
