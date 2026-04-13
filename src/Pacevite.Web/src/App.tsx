@@ -11,6 +11,7 @@ import { AddEventPage } from '@/pages/AddEventPage'
 import { EventDetailPage } from '@/pages/EventDetailPage'
 import { PredictPage } from '@/pages/PredictPage'
 import { SyncPage } from '@/pages/SyncPage'
+import { ChatWidget } from '@/components/chat/ChatWidget'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -82,6 +83,7 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <RouterProvider router={router} />
+          <ChatWidget />
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
