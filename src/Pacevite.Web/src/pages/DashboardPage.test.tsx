@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/handlers'
@@ -14,11 +14,13 @@ describe('DashboardPage', () => {
   it('renders the event list from the API', async () => {
     renderDashboard()
 
+    const heading = await screen.findByRole('heading', { name: /all events/i })
+    const section = heading.closest('section')!
+
     await waitFor(() => {
-      expect(screen.getAllByText('Berlin Marathon').length).toBeGreaterThan(0)
+      expect(within(section).getByText('Berlin Marathon')).toBeInTheDocument()
     })
-    expect(screen.getAllByText('MARATHON').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('2024-09-29').length).toBeGreaterThan(0)
+    expect(within(section).getByText('2024-09-29')).toBeInTheDocument()
   })
 
   it('renders personal bests section when data is present', async () => {
@@ -27,7 +29,10 @@ describe('DashboardPage', () => {
     await waitFor(() => {
       expect(screen.getByText(/personal bests/i)).toBeInTheDocument()
     })
-    expect(screen.getAllByText('MARATHON').length).toBeGreaterThan(0)
+    // MARATHON appears in both sections (personal bests card + event list row)
+    await waitFor(() => {
+      expect(screen.getAllByText('MARATHON')).toHaveLength(2)
+    })
   })
 
   it('shows empty state when no events exist', async () => {
