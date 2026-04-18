@@ -1,3 +1,3 @@
 event_type,event_name,event_date,completion,elapsed_secs
-HALF_MARATHON,Test Half Marathon,2024-06-01,FINISHED,5400
-5K,Test 5K,2024-05-01,FINISHED,1200
+MARATHON,Test Half Marathon,2024-06-01,FINISHED,5400
+GENERIC,Test 5K,2024-05-01,FINISHED,1200
