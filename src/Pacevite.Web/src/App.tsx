@@ -6,6 +6,7 @@ import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { UploadPage } from '@/pages/UploadPage'
+import { EventDetailPage } from '@/pages/EventDetailPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +33,14 @@ const router = createBrowserRouter([
     element: (
       <AuthGuard>
         <UploadPage />
+      </AuthGuard>
+    ),
+  },
+  {
+    path: '/events/:id',
+    element: (
+      <AuthGuard>
+        <EventDetailPage />
       </AuthGuard>
     ),
   },
