@@ -56,7 +56,7 @@ builder.Services.AddRateLimiter(options =>
 {
     options.AddFixedWindowLimiter("auth", limiter =>
     {
-        limiter.PermitLimit = 10;
+        limiter.PermitLimit = builder.Configuration.GetValue<int>("RateLimit:Auth:PermitLimit", defaultValue: 10);
         limiter.Window = TimeSpan.FromMinutes(1);
         limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         limiter.QueueLimit = 0;

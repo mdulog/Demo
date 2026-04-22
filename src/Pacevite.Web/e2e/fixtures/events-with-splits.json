@@ -1,0 +1,15 @@
+[
+  {
+    "event_type": "MARATHON",
+    "event_name": "Brighton Half Marathon",
+    "event_date": "2024-03-17",
+    "completion": "FINISHED",
+    "elapsed_secs": 6443,
+    "splits": [
+      { "split_type": "RUN", "split_label": "5km",    "split_secs": 1450, "cumulative_secs": 1450 },
+      { "split_type": "RUN", "split_label": "10km",   "split_secs": 1471, "cumulative_secs": 2921 },
+      { "split_type": "RUN", "split_label": "15km",   "split_secs": 1518, "cumulative_secs": 4439 },
+      { "split_type": "RUN", "split_label": "Finish", "split_secs": 2004, "cumulative_secs": 6443 }
+    ]
+  }
+]
