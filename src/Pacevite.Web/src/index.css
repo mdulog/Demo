@@ -1,5 +1,27 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode — toggling .dark on <html> activates dark: variants */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+  @theme inline tells Tailwind v4 to generate utilities that reference these
+  CSS variables at runtime rather than inlining static values at build time.
+  Changing the variables (e.g. in .dark) automatically updates every utility.
+*/
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-border: var(--color-border);
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-muted: var(--color-muted);
+  --color-badge: var(--color-badge);
+  --color-badge-fg: var(--color-badge-fg);
+  --color-action: var(--color-action);
+  --color-action-hover: var(--color-action-hover);
+  --color-action-fg: var(--color-action-fg);
+}
+
 @layer base {
   body {
     margin: 0;
@@ -9,5 +31,35 @@
 
   #root {
     min-height: 100svh;
+  }
+
+  /* Light mode (zinc scale, indigo accent stays as-is in components) */
+  :root {
+    --color-bg: #fafafa;           /* zinc-50  */
+    --color-surface: #ffffff;      /* white    */
+    --color-border: #e4e4e7;       /* zinc-200 */
+    --color-primary: #18181b;      /* zinc-900 */
+    --color-secondary: #71717a;    /* zinc-500 */
+    --color-muted: #a1a1aa;        /* zinc-400 */
+    --color-badge: #f4f4f5;        /* zinc-100 */
+    --color-badge-fg: #3f3f46;     /* zinc-700 */
+    --color-action: #18181b;       /* zinc-900 */
+    --color-action-hover: #27272a; /* zinc-800 */
+    --color-action-fg: #ffffff;    /* white    */
+  }
+
+  /* Dark mode overrides */
+  .dark {
+    --color-bg: #09090b;           /* zinc-950 */
+    --color-surface: #18181b;      /* zinc-900 */
+    --color-border: #27272a;       /* zinc-800 */
+    --color-primary: #fafafa;      /* zinc-50  */
+    --color-secondary: #a1a1aa;    /* zinc-400 */
+    --color-muted: #52525b;        /* zinc-600 */
+    --color-badge: #27272a;        /* zinc-800 */
+    --color-badge-fg: #d4d4d8;     /* zinc-300 */
+    --color-action: #fafafa;       /* zinc-50  */
+    --color-action-hover: #e4e4e7; /* zinc-200 */
+    --color-action-fg: #18181b;    /* zinc-900 */
   }
 }
