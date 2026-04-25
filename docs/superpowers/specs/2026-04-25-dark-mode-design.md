@@ -22,14 +22,13 @@ Add light and dark mode support to Pacevite. The theme defaults to the OS `prefe
 ### ThemeContext (`src/context/ThemeContext.tsx`)
 
 New context that:
-1. On mount: reads `localStorage.getItem('theme')` — if set, uses it; otherwise falls back to `window.matchMedia('(prefers-color-scheme: dark)').matches`
-2. Stores `theme: 'light' | 'dark'` in React state
-3. On every change: writes to `localStorage('theme')`, adds/removes the `dark` class on `<html>`
-4. Exposes `{ theme, toggleTheme }` via a `useTheme` hook
+1. On mount: reads `localStorage.getItem('theme')` — if set, uses it; otherwise reads `window.matchMedia('(prefers-color-scheme: dark)').matches`
+2. Stores `theme: 'light' | 'dark'` in React state and applies/removes the `dark` class on `<html>`
+3. Registers a `matchMedia` change listener — fires only when no manual override is stored in `localStorage`. When the OS theme changes and the user has not overridden it, the app theme updates in real time
+4. When the user manually toggles: writes to `localStorage('theme')`, which makes the `matchMedia` listener dormant for the rest of the session
+5. Exposes `{ theme, toggleTheme }` via a `useTheme` hook. The listener is cleaned up in the effect's teardown
 
 Wrapped in `App.tsx` alongside the existing `<AuthProvider>`.
-
-> **Note on reactivity:** The system preference is read once on mount. If the user has no stored preference and later changes their OS theme, the app will not auto-update until the next page load. This is intentional — once a stored preference exists it takes over, and adding a `matchMedia` listener would conflict with it.
 
 ### ThemeToggle (`src/components/ThemeToggle.tsx`)
 
@@ -140,7 +139,7 @@ This ensures chart lines and axes respond to theme switches without a page reloa
 
 ## Testing
 
-- `ThemeContext` — unit tests covering: initialises from `localStorage`, falls back to system pref, toggles `.dark` on `<html>`, persists choice to `localStorage`
+- `ThemeContext` — unit tests covering: initialises from `localStorage`, falls back to system pref, toggles `.dark` on `<html>`, persists choice to `localStorage`, reacts to OS change when no override is stored, does NOT react to OS change when a manual override is stored
 - `ThemeToggle` — unit test: renders Sun in light mode, Moon in dark mode, calls `toggleTheme` on click
 - Existing page/component tests pass unchanged because `renderWithProviders` is updated to include `ThemeProvider`
 - No new E2E tests required — theme is purely visual and not part of any authenticated flow
