@@ -36,6 +36,21 @@ export interface PersonalBestResponse {
   elapsedSecs: number
 }
 
+export interface PredictionDataPoint {
+  eventId: string | null
+  eventDate: string
+  elapsedSecs: number | null
+  fittedSecs: number
+}
+
+export interface PredictionResponse {
+  eventType: string
+  predictedSecs: number
+  confidenceLabel: string
+  avgImprovementSecs: number
+  dataPoints: PredictionDataPoint[]
+}
+
 export interface ValidationProblemDetails {
   title: string
   status: number

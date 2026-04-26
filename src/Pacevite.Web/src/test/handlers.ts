@@ -24,6 +24,20 @@ export const handlers = [
       },
     ])
   ),
+  http.get('http://localhost/api/events/prediction', () =>
+    HttpResponse.json({
+      eventType: 'HYROX',
+      predictedSecs: 4320,
+      confidenceLabel: 'High',
+      avgImprovementSecs: 215,
+      dataPoints: [
+        { eventId: 'event-1', eventDate: '2023-10-14', elapsedSecs: 4930, fittedSecs: 4920 },
+        { eventId: 'event-2', eventDate: '2024-03-09', elapsedSecs: 4724, fittedSecs: 4710 },
+        { eventId: 'event-3', eventDate: '2024-11-16', elapsedSecs: 4501, fittedSecs: 4508 },
+        { eventId: null,      eventDate: '2026-04-25', elapsedSecs: null,  fittedSecs: 4320 },
+      ],
+    })
+  ),
   http.get('http://localhost/api/events/:id', ({ params }) =>
     HttpResponse.json({
       id: params.id as string,
