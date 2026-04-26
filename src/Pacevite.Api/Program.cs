@@ -1,9 +1,11 @@
 using System.Text;
+using System.Text.Json;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using FluentValidation;
-using Mediator;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +39,10 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 // ── Database ──────────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+
+// ── Health Checks ─────────────────────────────────────────────────────────────
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>("database");
 
 // ── Identity ──────────────────────────────────────────────────────────────────
 builder.Services.AddIdentityCore<IdentityUser>(options =>
@@ -134,11 +140,33 @@ app.MapScalarApiReference();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHealthChecks("/health", new HealthCheckOptions { ResponseWriter = WriteHealthJson });
+
 // ── Endpoints ─────────────────────────────────────────────────────────────────
 app.MapGroup("/api").MapAuthEndpoints();
 app.MapGroup("/api/events").RequireAuthorization().MapEventEndpoints();
 
 app.Run();
+
+static Task WriteHealthJson(HttpContext context, HealthReport report)
+{
+    context.Response.ContentType = "application/json";
+    var payload = new
+    {
+        status = report.Status.ToString(),
+        duration_ms = report.TotalDuration.TotalMilliseconds,
+        checks = report.Entries.ToDictionary(
+            e => e.Key,
+            e => new
+            {
+                status = e.Value.Status.ToString(),
+                duration_ms = e.Value.Duration.TotalMilliseconds,
+                description = e.Value.Description,
+                error = e.Value.Exception?.Message,
+            })
+    };
+    return context.Response.WriteAsync(JsonSerializer.Serialize(payload));
+}
 
 // Exposed for integration test WebApplicationFactory
 public partial class Program;
