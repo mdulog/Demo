@@ -5,6 +5,7 @@ import { computeAverageSplits, computeSplitDeltas, formatElapsed } from '@/lib/c
 import { SplitChart } from '@/components/SplitChart'
 import { RaceComparison } from '@/components/RaceComparison'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { ChartNoAxesColumn } from 'lucide-react'
 
 export function EventDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -24,6 +25,12 @@ export function EventDetailPage() {
       <header className="bg-surface border-b border-border px-6 py-4 flex items-center justify-between">
         <h1 className="text-lg font-semibold text-primary">Pacevite</h1>
         <div className="flex items-center gap-4">
+          <Link
+            to="/predict"
+            className="inline-flex items-center gap-2 text-sm text-secondary hover:text-primary"
+          >
+            <ChartNoAxesColumn size={14} /> Predict
+          </Link>
           <ThemeToggle />
           <Link to="/dashboard" className="text-sm text-indigo-600 hover:text-indigo-800">
             ← Dashboard

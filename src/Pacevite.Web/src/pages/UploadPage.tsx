@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { ArrowLeft, FileUp } from 'lucide-react'
+import { ArrowLeft, FileUp, ChartNoAxesColumn } from 'lucide-react'
 import type { EventResponse } from '@/lib/types'
 
 export function UploadPage() {
@@ -51,6 +51,12 @@ export function UploadPage() {
           <ArrowLeft size={16} />
         </Link>
         <h1 className="text-lg font-semibold text-primary flex-1">Upload Events</h1>
+        <Link
+          to="/predict"
+          className="inline-flex items-center gap-2 text-sm text-secondary hover:text-primary"
+        >
+          <ChartNoAxesColumn size={14} /> Predict
+        </Link>
         <ThemeToggle />
       </header>
 

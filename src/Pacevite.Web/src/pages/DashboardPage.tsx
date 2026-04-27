@@ -8,8 +8,9 @@ import { formatTime, type PersonalBestResponse } from '@/lib/types'
 import { groupByEventType, computePbs } from '@/lib/chartUtils'
 import { ProgressChart } from '@/components/ProgressChart'
 import { PbPanel } from '@/components/PbPanel'
+import { PredictionTeaser } from '@/components/PredictionTeaser'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { Upload, Trash2, Trophy, LogOut, ChartLine } from 'lucide-react'
+import { Upload, Trash2, Trophy, LogOut, ChartLine, ChartNoAxesColumn } from 'lucide-react'
 
 export function DashboardPage() {
   const { user, logout } = useAuth()
@@ -53,6 +54,12 @@ export function DashboardPage() {
           >
             <Upload size={14} /> Upload
           </Link>
+          <Link
+            to="/predict"
+            className="inline-flex items-center gap-2 text-sm text-secondary hover:text-primary"
+          >
+            <ChartNoAxesColumn size={14} /> Predict
+          </Link>
           <ThemeToggle />
           <button
             onClick={logout}
@@ -64,6 +71,7 @@ export function DashboardPage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+        <PredictionTeaser />
         {/* Analytics panels */}
         {events.length > 0 && (
           <section data-testid="progress-chart-panel">
