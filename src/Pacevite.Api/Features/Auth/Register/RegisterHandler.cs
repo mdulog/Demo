@@ -22,8 +22,7 @@ public sealed class RegisterHandler(
         if (!result.Succeeded)
         {
             var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-            logger.LogWarning("Registration failed for email hash {EmailHash}: {Errors}",
-                command.Email.GetHashCode(), errors);
+            logger.LogWarning("Registration failed: {Errors}", errors);
             return AuthResult.Fail(errors);
         }
 

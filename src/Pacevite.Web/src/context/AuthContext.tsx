@@ -25,6 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       tokenStore.clear()
       setUser(null)
     })
+    return () => setLogoutCallback(() => {})
   }, [])
 
   function login(userId: string, email: string, token: string) {
