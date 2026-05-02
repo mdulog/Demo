@@ -13,6 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 {
     public DbSet<Event> Events => Set<Event>();
     public DbSet<EventSplit> EventSplits => Set<EventSplit>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     private static readonly ValueConverter<Dictionary<string, object>, string> JsonDictConverter = new(
         v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
@@ -63,6 +64,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             entity.Property(s => s.Metadata)
                 .HasColumnType("jsonb")
                 .HasConversion(JsonDictConverter);
+        });
+
+        builder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(rt => rt.Id);
+            entity.HasIndex(rt => rt.TokenHash).IsUnique();
+            entity.HasIndex(rt => new { rt.UserId, rt.RevokedAt });
+            entity.Ignore(rt => rt.IsExpired);
+            entity.Ignore(rt => rt.IsActive);
         });
     }
 }
