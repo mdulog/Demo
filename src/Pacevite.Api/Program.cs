@@ -106,6 +106,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // ── Services ──────────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
 // ── Event Parsers (registered as IEventParser — endpoint dispatches by content type) ──
 builder.Services.AddSingleton<IEventParser, CsvEventParser>();
