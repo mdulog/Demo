@@ -17,12 +17,11 @@ public static class AuthEndpoints
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/auth")
-            .RequireRateLimiting("auth")
-            .AllowAnonymous();
+            .RequireRateLimiting("auth");
 
-        group.MapPost("/register", RegisterAsync).WithName("Register");
-        group.MapPost("/login", LoginAsync).WithName("Login");
-        group.MapPost("/refresh", RefreshAsync).WithName("Refresh");
+        group.MapPost("/register", RegisterAsync).WithName("Register").AllowAnonymous();
+        group.MapPost("/login", LoginAsync).WithName("Login").AllowAnonymous();
+        group.MapPost("/refresh", RefreshAsync).WithName("Refresh").AllowAnonymous();
         group.MapPost("/logout", LogoutAsync).WithName("Logout").RequireAuthorization();
 
         return app;
