@@ -21,15 +21,13 @@ describe('AuthContext', () => {
     expect(tokenStore.get()).toBe('jwt-token-xyz')
   })
 
-  it('logout clears user state and token', () => {
+  it('logout clears user state and token', async () => {
     const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider })
 
     act(() => {
       result.current.login('user-42', 'runner@example.com', 'jwt-token-xyz')
     })
-    act(() => {
-      result.current.logout()
-    })
+    await act(async () => { await result.current.logout() })
 
     expect(result.current.isAuthenticated).toBe(false)
     expect(result.current.user).toBeNull()

@@ -32,7 +32,7 @@ export function renderWithProviders(
     user: authenticated ? { userId: 'user-1', email: 'test@example.com' } : null,
     isAuthenticated: authenticated,
     login: vi.fn(),
-    logout: vi.fn(),
+    logout: vi.fn().mockResolvedValue(undefined),
   }
 
   return render(

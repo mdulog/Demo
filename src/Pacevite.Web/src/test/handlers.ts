@@ -88,6 +88,9 @@ export const handlers = [
       { status: 201 }
     )
   ),
+  http.post('http://localhost/api/auth/logout', () =>
+    new HttpResponse(null, { status: 204 })
+  ),
 ]
 
 export const server = setupServer(...handlers)

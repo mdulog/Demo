@@ -35,8 +35,12 @@ apiClient.interceptors.response.use(
   async error => {
     const originalRequest = error.config
 
-    // Not a 401, or already retried after a refresh — don't attempt again
-    if (error.response?.status !== 401 || originalRequest._isRetry) {
+    // _isRetry: post-refresh retry itself got 401 — token is truly invalid, force logout.
+    // _skipRefresh: the refresh call itself — never re-enter the interceptor for it.
+    if (error.response?.status !== 401 || originalRequest._isRetry || originalRequest._skipRefresh) {
+      if (originalRequest._isRetry) {
+        onLogoutCallback?.()
+      }
       return Promise.reject(error)
     }
 
@@ -54,7 +58,10 @@ apiClient.interceptors.response.use(
     isRefreshing = true
 
     try {
-      const { data } = await apiClient.post<{ token: string }>('/auth/refresh')
+      // _skipRefresh prevents the interceptor from re-intercepting a 401 from this call.
+      const { data } = await apiClient.post<{ token: string }>('/auth/refresh', null, {
+        _skipRefresh: true,
+      } as object)
       tokenStore.set(data.token)
       refreshQueue.forEach(({ resolve }) => resolve(data.token))
       refreshQueue = []
