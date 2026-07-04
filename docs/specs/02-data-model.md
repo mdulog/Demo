@@ -2,7 +2,7 @@
 
 ## Overview
 
-Pacevite uses PostgreSQL 17 via EF Core 10. The schema has two application tables (`Events`, `EventSplits`) alongside the standard ASP.NET Identity tables (`AspNetUsers`, `AspNetRoles`, etc.). All schema changes are managed via EF Core migrations in `src/Pacevite.Api/Migrations/`.
+Pacevite uses PostgreSQL 17 via EF Core 10. The schema has four application tables (`Events`, `EventSplits`, `RefreshTokens`, `SyncConnections`) alongside the standard ASP.NET Identity tables (`AspNetUsers`, `AspNetRoles`, etc.). All schema changes are managed via EF Core migrations in `src/Pacevite.Api/Migrations/`.
 
 User ownership is enforced at the application layer — there is no database-level FK from `Events.UserId` to `AspNetUsers.Id`. See [ADR 0006](../decisions/0006-no-fk-from-event-userid-to-identity.md).
 
@@ -29,7 +29,10 @@ Primary table for race results. Each row represents one athlete's result in one 
 | `AgeGroupFieldSize` | `integer` | NULL | Total starters in age group |
 | `Location` | `jsonb` | NOT NULL | Structured location data (city, country, etc.) — see below |
 | `Metadata` | `jsonb` | NOT NULL | Event-type-specific supplementary data — see below |
-| `Source` | `text` | NOT NULL | Always `"MANUAL"` for uploaded events |
+| `Source` | `text` | NOT NULL | Set by the creating path: `"CSV"` / `"JSON"` / `"GPX"` (file upload), `"STRAVA"` (import), `"MANUAL"` (default, manual entry) |
+| `NeedsEnrichment` | `boolean` | NOT NULL | Flags an event (e.g. from GPX) that's missing data a user may want to fill in later |
+| `ExternalActivityId` | `text` | NULL | Set only for events created via sync — the originating external activity ID, so re-sync doesn't re-offer it |
+| `SyncConnectionId` | `uuid` | NULL | FK → `SyncConnections.Id` — which sync connection produced this event, if any |
 | `CreatedAt` | `timestamp with time zone` | NOT NULL | UTC timestamp of row creation |
 
 **Indexes:**
@@ -80,6 +83,44 @@ Child table for individual split segments within a race. Ordered by `SplitSecs` 
 
 ---
 
+### `RefreshTokens`
+
+Standalone table for refresh-token session continuity (see [ADR 0007](../decisions/0007-standalone-refresh-tokens-table.md) — not part of `AspNetUsers`/Identity's own token storage).
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `Id` | `uuid` | NOT NULL | PK |
+| `UserId` | `text` | NOT NULL | FK-by-convention to `AspNetUsers.Id` (no DB constraint, consistent with `Events.UserId`) |
+| `TokenHash` | `text` | NOT NULL | Hash of the raw token — the raw value is never persisted |
+| `ExpiresAt` | `timestamp with time zone` | NOT NULL | 7-day lifetime from issuance |
+| `CreatedAt` | `timestamp with time zone` | NOT NULL | UTC timestamp of issuance |
+| `RevokedAt` | `timestamp with time zone` | NULL | Set on logout or rotation |
+| `ReplacedByTokenHash` | `text` | NULL | Links a rotated-out token to its replacement |
+
+**Indexes:** `PK_RefreshTokens` (`Id`), unique index on `TokenHash`, index on `(UserId, RevokedAt)`.
+
+---
+
+### `SyncConnections`
+
+One row per athlete-platform OAuth connection (currently Strava only — see `docs/specs/2026-07-03-external-sync-scope-decisions.md` for why Garmin/Apple Health are parked).
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `Id` | `uuid` | NOT NULL | PK |
+| `UserId` | `text` | NOT NULL | FK-by-convention to `AspNetUsers.Id` |
+| `Platform` | `text` | NOT NULL | `SyncPlatform` enum, stored as string (`Strava` today) |
+| `ExternalAthleteId` | `text` | NOT NULL | The platform's own athlete/user ID |
+| `AccessTokenEncrypted` / `RefreshTokenEncrypted` | `text` | NOT NULL | Encrypted at rest via ASP.NET Core Data Protection (`IDataProtector`) — raw OAuth tokens are never stored or logged (OWASP A02) |
+| `ExpiresAt` | `timestamp with time zone` | NOT NULL | Access-token expiry; refreshed proactively before requests when close to expiring |
+| `ConnectedAt` | `timestamp with time zone` | NOT NULL | UTC timestamp the connection was created |
+
+**Indexes:** `PK_SyncConnections` (`Id`), unique index on `(UserId, Platform)` — one connection per platform per user.
+
+`SyncConnection.Events` is a navigation property: `Events.SyncConnectionId` optionally links an event back to the connection that imported it.
+
+---
+
 ## JSONB Columns
 
 The `Location` and `Metadata` columns on `Events`, and `Metadata` on `EventSplits`, store structured supplementary data without requiring per-event-type schema migrations. See [ADR 0003](../decisions/0003-jsonb-for-location-and-metadata.md).
@@ -112,11 +153,19 @@ AspNetUsers (Identity-managed)
   │
   │  UserId (string, no FK constraint — see ADR 0006)
   │
-  └──< Events (one user → many events)
+  ├──< Events (one user → many events)
+  │         │
+  │         │  EventId (uuid, FK with CASCADE DELETE)
+  │         │
+  │         └──< EventSplits (one event → many splits)
+  │
+  ├──< RefreshTokens (one user → many tokens, historical + active)
+  │
+  └──< SyncConnections (one user → at most one per Platform)
             │
-            │  EventId (uuid, FK with CASCADE DELETE)
+            │  SyncConnectionId (uuid, nullable FK, no cascade)
             │
-            └──< EventSplits (one event → many splits)
+            └──< Events (one connection → many imported events)
 ```
 
 ---
