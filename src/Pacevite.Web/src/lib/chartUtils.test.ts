@@ -21,6 +21,7 @@ const makeEvent = (overrides: Partial<EventResponse> = {}): EventResponse => ({
   fieldSize: null,
   ageGroupFieldSize: null,
   source: 'manual',
+  needsEnrichment: false,
   createdAt: '2024-01-01T00:00:00Z',
   splits: [],
   ...overrides,
