@@ -35,4 +35,7 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Superpowers plugin — internal working copy (docs/plans/ and docs/specs/ are the canonical locations)
 .superpowers/
+docs/superpowers/
