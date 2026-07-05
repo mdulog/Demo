@@ -1448,7 +1448,6 @@ export function computePbs<T extends ChartEvent>(events: T[]): Record<string, T>
 ```
 
 The existing doc comments above each function stay as they are; only the signatures and internal type annotations change.
-```
 
 - [ ] **Step 2: Run the frontend tests**
 
