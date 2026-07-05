@@ -37,6 +37,10 @@ dist/
 .DS_Store
 Thumbs.db
 
+# Editor/tool project config — reproducible defaults, not load-bearing for the team
+.idea/
+.serena/
+
 # Superpowers plugin — internal working copy (docs/plans/ and docs/specs/ are the canonical locations)
 .superpowers/
 docs/superpowers/
