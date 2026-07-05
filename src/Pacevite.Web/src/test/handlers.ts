@@ -38,6 +38,17 @@ export const handlers = [
       ],
     })
   ),
+  http.get('http://localhost/api/events/timeline', () =>
+    HttpResponse.json([
+      {
+        id: 'event-1',
+        eventDate: '2024-09-29',
+        eventType: 'MARATHON',
+        elapsedSecs: 12600,
+        completion: 'FINISHED',
+      },
+    ])
+  ),
   http.get('http://localhost/api/events/:id', ({ params }) =>
     HttpResponse.json({
       id: params.id as string,
@@ -50,34 +61,40 @@ export const handlers = [
       ageGroupRank: null,
       fieldSize: 45000,
       ageGroupFieldSize: null,
-      source: 'manual',
+      source: 'MANUAL',
       needsEnrichment: false,
       createdAt: '2024-10-01T00:00:00Z',
       splits: [
         { id: 'split-1', splitType: 'RUN', splitLabel: '10km', splitSecs: 2940, cumulativeSecs: 2940 },
         { id: 'split-2', splitType: 'RUN', splitLabel: '21km', splitSecs: 3180, cumulativeSecs: 6120 },
       ],
+      averageSplits: [
+        { label: '10km', avgSecs: 2940 },
+        { label: '21km', avgSecs: 3180 },
+      ],
     })
   ),
   http.get('http://localhost/api/events', () =>
-    HttpResponse.json([
-      {
-        id: 'event-1',
-        eventType: 'MARATHON',
-        eventName: 'Berlin Marathon',
-        eventDate: '2024-09-29',
-        completion: 'FINISHED',
-        elapsedSecs: 12600,
-        overallRank: 1500,
-        ageGroupRank: null,
-        fieldSize: 45000,
-        ageGroupFieldSize: null,
-        source: 'manual',
-        needsEnrichment: false,
-        createdAt: '2024-10-01T00:00:00Z',
-        splits: [],
-      },
-    ])
+    HttpResponse.json({
+      items: [
+        {
+          id: 'event-1',
+          eventType: 'MARATHON',
+          eventName: 'Berlin Marathon',
+          eventDate: '2024-09-29',
+          completion: 'FINISHED',
+          elapsedSecs: 12600,
+          overallRank: 1500,
+          ageGroupRank: null,
+          fieldSize: 45000,
+          ageGroupFieldSize: null,
+          source: 'MANUAL',
+          needsEnrichment: false,
+          createdAt: '2024-10-01T00:00:00Z',
+        },
+      ],
+      nextCursor: null,
+    })
   ),
   http.delete('http://localhost/api/events/:id', () =>
     new HttpResponse(null, { status: 204 })
@@ -108,7 +125,7 @@ export const handlers = [
       [
         {
           id: 'event-2',
-          eventType: 'Marathon',
+          eventType: 'MARATHON',
           eventName: 'Test Half',
           eventDate: '2024-06-01',
           completion: 'FINISHED',
@@ -117,7 +134,7 @@ export const handlers = [
           ageGroupRank: null,
           fieldSize: null,
           ageGroupFieldSize: null,
-          source: 'csv',
+          source: 'CSV',
           needsEnrichment: false,
           createdAt: '2024-10-01T00:00:00Z',
           splits: [],

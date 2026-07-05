@@ -29,6 +29,30 @@ export interface EventSplitResponse {
   cumulativeSecs: number
 }
 
+export type EventSummaryResponse = Omit<EventResponse, 'splits'>
+
+export interface PagedEventsResponse {
+  items: EventSummaryResponse[]
+  nextCursor: string | null
+}
+
+export interface TimelineEntry {
+  id: string
+  eventDate: string
+  eventType: string
+  elapsedSecs: number
+  completion: string
+}
+
+export interface AverageSplitResponse {
+  label: string
+  avgSecs: number
+}
+
+export interface EventDetailResponse extends EventResponse {
+  averageSplits: AverageSplitResponse[]
+}
+
 export interface PersonalBestResponse {
   eventType: string
   eventId: string

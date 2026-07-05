@@ -65,6 +65,7 @@ export function AddEventPage() {
     onSuccess: (created) => {
       void queryClient.invalidateQueries({ queryKey: ['events'] })
       void queryClient.invalidateQueries({ queryKey: ['personal-bests'] })
+      void queryClient.invalidateQueries({ queryKey: ['timeline'] })
       navigate(`/events/${created.id}`)
     },
     onError: (err) => {

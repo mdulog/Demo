@@ -1,17 +1,17 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { useEvents } from '@/hooks/useEvents'
+import { useTimeline } from '@/hooks/useTimeline'
 import { usePrediction } from '@/hooks/usePrediction'
 import { formatElapsed } from '@/lib/chartUtils'
 import { TrendingDown } from 'lucide-react'
 
 export function PredictionTeaser() {
-  const { data: events = [], isLoading: eventsLoading } = useEvents()
+  const { data: timeline = [], isLoading: eventsLoading } = useTimeline()
 
   const mostRecentType = useMemo(() => {
-    const sorted = [...events].sort((a, b) => b.eventDate.localeCompare(a.eventDate))
+    const sorted = [...timeline].sort((a, b) => b.eventDate.localeCompare(a.eventDate))
     return sorted[0]?.eventType ?? null
-  }, [events])
+  }, [timeline])
 
   const { data: prediction, isLoading: predLoading, isError } = usePrediction(mostRecentType)
 

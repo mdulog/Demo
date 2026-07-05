@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
-import { useEvents } from '@/hooks/useEvents'
+import { useTimeline } from '@/hooks/useTimeline'
 import { usePrediction } from '@/hooks/usePrediction'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { PredictionCard } from '@/components/PredictionCard'
@@ -11,7 +11,7 @@ import { Upload, LogOut, ChartNoAxesColumn } from 'lucide-react'
 
 export function PredictPage() {
   const { user, logout } = useAuth()
-  const { data: events = [], isLoading: eventsLoading } = useEvents()
+  const { data: events = [], isLoading: eventsLoading } = useTimeline()
 
   const eligibleTypes = useMemo(() => {
     const counts: Record<string, number> = {}

@@ -49,6 +49,7 @@ export function SyncPage() {
       )
       void queryClient.invalidateQueries({ queryKey: ['events'] })
       void queryClient.invalidateQueries({ queryKey: ['personal-bests'] })
+      void queryClient.invalidateQueries({ queryKey: ['timeline'] })
     },
   })
 

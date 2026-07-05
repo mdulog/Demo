@@ -1,11 +1,11 @@
 import { LineChart, Line, Tooltip, ResponsiveContainer } from 'recharts'
-import type { EventResponse } from '@/lib/types'
+import type { EventResponse, TimelineEntry } from '@/lib/types'
 import { formatElapsed } from '@/lib/chartUtils'
 import { useTheme } from '@/context/ThemeContext'
 
 interface Props {
   event: EventResponse
-  sameTypeEvents: EventResponse[]
+  sameTypeEvents: TimelineEntry[]
 }
 
 export function RaceComparison({ event, sameTypeEvents }: Props) {

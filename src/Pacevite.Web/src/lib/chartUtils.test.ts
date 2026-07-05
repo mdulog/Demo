@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest'
 import {
   groupByEventType,
   computePbs,
-  computeAverageSplits,
   computeSplitDeltas,
   formatElapsed,
   type AverageSplit,
@@ -128,74 +127,6 @@ describe('computePbs', () => {
 
     // Assert — strict < means first-seen wins on tie
     expect(result['MARATHON'].id).toBe('first')
-  })
-})
-
-describe('computeAverageSplits', () => {
-  it('returns empty array for events with no splits', () => {
-    // Arrange
-    const events = [makeEvent()]
-
-    // Act
-    const result = computeAverageSplits(events)
-
-    // Assert
-    expect(result).toEqual([])
-  })
-
-  it('returns empty array for empty input', () => {
-    // Arrange
-    const events: EventResponse[] = []
-
-    // Act
-    const result = computeAverageSplits(events)
-
-    // Assert
-    expect(result).toEqual([])
-  })
-
-  it('computes mean splitSecs per split label', () => {
-    // Arrange
-    const events = [
-      makeEvent({
-        splits: [
-          { id: 's1', splitType: 'RUN', splitLabel: '10km', splitSecs: 3000, cumulativeSecs: 3000 },
-        ],
-      }),
-      makeEvent({
-        splits: [
-          { id: 's2', splitType: 'RUN', splitLabel: '10km', splitSecs: 3600, cumulativeSecs: 3600 },
-        ],
-      }),
-    ]
-
-    // Act
-    const result = computeAverageSplits(events)
-
-    // Assert
-    expect(result).toHaveLength(1)
-    expect(result[0].label).toBe('10km')
-    expect(result[0].avgSecs).toBe(3300)
-  })
-
-  it('handles multiple distinct split labels', () => {
-    // Arrange
-    const events = [
-      makeEvent({
-        splits: [
-          { id: 's1', splitType: 'RUN', splitLabel: '10km', splitSecs: 3000, cumulativeSecs: 3000 },
-          { id: 's2', splitType: 'RUN', splitLabel: '21km', splitSecs: 3300, cumulativeSecs: 6300 },
-        ],
-      }),
-    ]
-
-    // Act
-    const result = computeAverageSplits(events)
-
-    // Assert
-    expect(result).toHaveLength(2)
-    expect(result.find(s => s.label === '10km')!.avgSecs).toBe(3000)
-    expect(result.find(s => s.label === '21km')!.avgSecs).toBe(3300)
   })
 })
 

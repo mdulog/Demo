@@ -52,25 +52,6 @@ export function computePbs<T extends ChartEvent>(events: T[]): Record<string, T>
 }
 
 /**
- * Computes the mean splitSecs for each distinct split label across all provided events.
- * Labels with no occurrences are never included — the result length equals the number of
- * distinct labels present in the input.
- */
-export function computeAverageSplits(events: EventResponse[]): AverageSplit[] {
-  const byLabel: Record<string, number[]> = {}
-  for (const ev of events) {
-    for (const split of ev.splits) {
-      if (!byLabel[split.splitLabel]) byLabel[split.splitLabel] = []
-      byLabel[split.splitLabel].push(split.splitSecs)
-    }
-  }
-  return Object.entries(byLabel).map(([label, values]) => ({
-    label,
-    avgSecs: Math.round(values.reduce((sum, v) => sum + v, 0) / values.length),
-  }))
-}
-
-/**
  * For each split in an event, computes how far it deviates from the supplied average splits.
  * delta < 0 means the split was faster than average; delta > 0 means slower.
  * When no matching average exists for a label, delta defaults to 0.

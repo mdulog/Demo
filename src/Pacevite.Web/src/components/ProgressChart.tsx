@@ -1,11 +1,11 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import type { DotItemDotProps } from 'recharts/types/util/types'
-import type { EventResponse } from '@/lib/types'
+import type { TimelineEntry } from '@/lib/types'
 import { formatElapsed } from '@/lib/chartUtils'
 import { useTheme } from '@/context/ThemeContext'
 
 interface Props {
-  events: EventResponse[]
+  events: TimelineEntry[]
   pbId: string | undefined
 }
 
@@ -45,12 +45,7 @@ export function ProgressChart({ events, pbId }: Props) {
     )
   }
 
-  const data = events.map(ev => ({
-    date: ev.eventDate,
-    secs: ev.elapsedSecs,
-    name: ev.eventName,
-    id: ev.id,
-  }))
+  const data = events.map(ev => ({ date: ev.eventDate, secs: ev.elapsedSecs, id: ev.id }))
 
   return (
     <div data-testid="progress-chart">

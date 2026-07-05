@@ -37,7 +37,8 @@ describe('DashboardPage', () => {
 
   it('shows empty state when no events exist', async () => {
     server.use(
-      http.get('http://localhost/api/events', () => HttpResponse.json([])),
+      http.get('http://localhost/api/events', () => HttpResponse.json({ items: [], nextCursor: null })),
+      http.get('http://localhost/api/events/timeline', () => HttpResponse.json([])),
       http.get('http://localhost/api/events/personal-bests', () => HttpResponse.json([]))
     )
 
@@ -61,7 +62,8 @@ describe('DashboardPage', () => {
   it('shows empty state in progress chart when no events exist', async () => {
     // Arrange
     server.use(
-      http.get('http://localhost/api/events', () => HttpResponse.json([])),
+      http.get('http://localhost/api/events', () => HttpResponse.json({ items: [], nextCursor: null })),
+      http.get('http://localhost/api/events/timeline', () => HttpResponse.json([])),
       http.get('http://localhost/api/events/personal-bests', () => HttpResponse.json([]))
     )
 
@@ -88,24 +90,26 @@ describe('DashboardPage', () => {
   it('shows a needs-enrichment badge for events missing placement data', async () => {
     server.use(
       http.get('http://localhost/api/events', () =>
-        HttpResponse.json([
-          {
-            id: 'event-gpx-1',
-            eventType: 'GENERIC',
-            eventName: 'Morning Run',
-            eventDate: '2026-05-01',
-            completion: 'FINISHED',
-            elapsedSecs: 2700,
-            overallRank: null,
-            ageGroupRank: null,
-            fieldSize: null,
-            ageGroupFieldSize: null,
-            source: 'GPX',
-            needsEnrichment: true,
-            createdAt: '2026-05-01T00:00:00Z',
-            splits: [],
-          },
-        ])
+        HttpResponse.json({
+          items: [
+            {
+              id: 'event-gpx-1',
+              eventType: 'GENERIC',
+              eventName: 'Morning Run',
+              eventDate: '2026-05-01',
+              completion: 'FINISHED',
+              elapsedSecs: 2700,
+              overallRank: null,
+              ageGroupRank: null,
+              fieldSize: null,
+              ageGroupFieldSize: null,
+              source: 'GPX',
+              needsEnrichment: true,
+              createdAt: '2026-05-01T00:00:00Z',
+            },
+          ],
+          nextCursor: null,
+        })
       )
     )
 

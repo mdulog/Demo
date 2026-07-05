@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { useEvent } from '@/hooks/useEvent'
-import { useEvents } from '@/hooks/useEvents'
-import { computeAverageSplits, computeSplitDeltas, formatElapsed } from '@/lib/chartUtils'
+import { useTimeline } from '@/hooks/useTimeline'
+import { computeSplitDeltas, formatElapsed } from '@/lib/chartUtils'
 import { SplitChart } from '@/components/SplitChart'
 import { RaceComparison } from '@/components/RaceComparison'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -11,14 +11,13 @@ export function EventDetailPage() {
   const { id } = useParams<{ id: string }>()
 
   const { data: event, isLoading } = useEvent(id)
-  const { data: allEvents = [] } = useEvents()
+  const { data: timeline = [] } = useTimeline()
 
   if (isLoading) return <p className="p-8 text-secondary">Loading…</p>
   if (!event) return <p className="p-8 text-secondary">Event not found.</p>
 
-  const sameTypeEvents = allEvents.filter(e => e.eventType === event.eventType)
-  const avgSplits = computeAverageSplits(sameTypeEvents)
-  const splitDeltas = computeSplitDeltas(event, avgSplits)
+  const sameTypeEvents = timeline.filter(e => e.eventType === event.eventType)
+  const splitDeltas = computeSplitDeltas(event, event.averageSplits)
 
   return (
     <div className="min-h-screen bg-bg">

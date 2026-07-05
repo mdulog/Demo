@@ -23,6 +23,7 @@ export function UploadPage() {
     onSuccess: (created) => {
       void queryClient.invalidateQueries({ queryKey: ['events'] })
       void queryClient.invalidateQueries({ queryKey: ['personal-bests'] })
+      void queryClient.invalidateQueries({ queryKey: ['timeline'] })
       navigate('/dashboard', {
         state: { uploadedCount: created.length },
       })

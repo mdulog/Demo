@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api'
 import { useAuth } from '@/hooks/useAuth'
 import { useEvents } from '@/hooks/useEvents'
+import { useTimeline } from '@/hooks/useTimeline'
 import { formatTime, type PersonalBestResponse } from '@/lib/types'
 import { groupByEventType, computePbs } from '@/lib/chartUtils'
 import { ProgressChart } from '@/components/ProgressChart'
@@ -16,9 +17,12 @@ export function DashboardPage() {
   const { user, logout } = useAuth()
   const queryClient = useQueryClient()
 
-  const { data: events = [], isLoading: eventsLoading } = useEvents()
-  const grouped = groupByEventType(events)
-  const pbs = computePbs(events)
+  const { data, isLoading: eventsLoading } = useEvents()
+  const events = data?.pages.flatMap(p => p.items) ?? []
+
+  const { data: timeline = [] } = useTimeline()
+  const grouped = groupByEventType(timeline)
+  const pbs = computePbs(timeline)
   const defaultType = Object.keys(grouped)[0] ?? ''
   const [selectedType, setSelectedType] = useState<string>(defaultType)
   const chartType = selectedType || defaultType
@@ -38,6 +42,7 @@ export function DashboardPage() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['events'] })
       void queryClient.invalidateQueries({ queryKey: ['personal-bests'] })
+      void queryClient.invalidateQueries({ queryKey: ['timeline'] })
     },
   })
 
@@ -85,7 +90,7 @@ export function DashboardPage() {
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
         <PredictionTeaser />
         {/* Analytics panels */}
-        {events.length > 0 && (
+        {timeline.length > 0 && (
           <section data-testid="progress-chart-panel">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-secondary uppercase tracking-wide flex items-center gap-2">
@@ -105,12 +110,12 @@ export function DashboardPage() {
             </div>
             <div className="bg-surface rounded-lg border border-border p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
               <ProgressChart events={chartEvents} pbId={pbId} />
-              <PbPanel events={events} selectedType={chartType} onSelectType={setSelectedType} />
+              <PbPanel events={timeline} selectedType={chartType} onSelectType={setSelectedType} />
             </div>
           </section>
         )}
 
-        {events.length === 0 && !eventsLoading && (
+        {timeline.length === 0 && !eventsLoading && (
           <div data-testid="progress-chart-empty" className="hidden" />
         )}
 

@@ -1,8 +1,8 @@
-import type { EventResponse } from '@/lib/types'
+import type { TimelineEntry } from '@/lib/types'
 import { computePbs, groupByEventType, formatElapsed } from '@/lib/chartUtils'
 
 interface Props {
-  events: EventResponse[]
+  events: TimelineEntry[]
   selectedType: string
   onSelectType: (type: string) => void
 }

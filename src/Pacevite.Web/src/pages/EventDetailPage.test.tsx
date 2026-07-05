@@ -50,6 +50,10 @@ describe('EventDetailPage', () => {
   it('shows no-splits message when event has no splits', async () => {
     // Arrange
     server.use(
+      // Registered first so it wins over the /:id override below — MSW's runtime
+      // handlers are matched in registration order, and "timeline" would otherwise
+      // match the /:id pattern.
+      http.get('http://localhost/api/events/timeline', () => HttpResponse.json([])),
       http.get('http://localhost/api/events/:id', () =>
         HttpResponse.json({
           id: 'event-nosplits',
@@ -65,6 +69,7 @@ describe('EventDetailPage', () => {
           source: 'manual',
           createdAt: '2024-10-01T00:00:00Z',
           splits: [],
+          averageSplits: [],
         })
       )
     )
@@ -81,6 +86,10 @@ describe('EventDetailPage', () => {
   it('shows a needs-enrichment banner when the event is missing placement data', async () => {
     // Arrange
     server.use(
+      // Registered first so it wins over the /:id override below — MSW's runtime
+      // handlers are matched in registration order, and "timeline" would otherwise
+      // match the /:id pattern.
+      http.get('http://localhost/api/events/timeline', () => HttpResponse.json([])),
       http.get('http://localhost/api/events/:id', () =>
         HttpResponse.json({
           id: 'event-gpx-1',
@@ -97,6 +106,7 @@ describe('EventDetailPage', () => {
           needsEnrichment: true,
           createdAt: '2026-05-01T00:00:00Z',
           splits: [],
+          averageSplits: [],
         })
       )
     )
