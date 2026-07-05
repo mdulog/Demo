@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api'
@@ -11,13 +11,24 @@ import { ProgressChart } from '@/components/ProgressChart'
 import { PbPanel } from '@/components/PbPanel'
 import { PredictionTeaser } from '@/components/PredictionTeaser'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { Upload, Plus, Trash2, Trophy, LogOut, ChartLine, ChartNoAxesColumn, Link2 } from 'lucide-react'
+import { Upload, Plus, Trash2, Trophy, LogOut, ChartLine, ChartNoAxesColumn, Link2, Search } from 'lucide-react'
+
+const SEARCH_DEBOUNCE_MS = 300
 
 export function DashboardPage() {
   const { user, logout } = useAuth()
   const queryClient = useQueryClient()
 
-  const { data, isLoading: eventsLoading } = useEvents()
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  }, [search])
+
+  const { data, isLoading: eventsLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useEvents({ search: debouncedSearch || undefined })
   const events = data?.pages.flatMap(p => p.items) ?? []
 
   const { data: timeline = [] } = useTimeline()
@@ -144,15 +155,30 @@ export function DashboardPage() {
             All Events
           </h2>
 
+          <div className="relative mb-3">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <input
+              type="search"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search events…"
+              className="w-full bg-surface border border-border rounded-md pl-9 pr-3 py-2 text-sm text-primary placeholder:text-muted"
+            />
+          </div>
+
           {eventsLoading && <p className="text-sm text-secondary">Loading…</p>}
 
-          {!eventsLoading && events.length === 0 && (
+          {!eventsLoading && events.length === 0 && !debouncedSearch && (
             <div className="bg-surface rounded-lg border border-dashed border-border p-12 text-center">
               <p className="text-secondary text-sm">No events yet.</p>
               <Link to="/upload" className="text-sm font-medium text-primary underline mt-2 inline-block">
                 Upload your first event
               </Link>
             </div>
+          )}
+
+          {!eventsLoading && events.length === 0 && debouncedSearch && (
+            <p className="text-sm text-secondary">No events match “{debouncedSearch}”.</p>
           )}
 
           {events.length > 0 && (
@@ -202,6 +228,18 @@ export function DashboardPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {hasNextPage && (
+            <div className="mt-3 text-center">
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="text-sm font-medium text-indigo-600 hover:text-indigo-800 disabled:opacity-40"
+              >
+                {isFetchingNextPage ? 'Loading…' : 'Load more'}
+              </button>
             </div>
           )}
         </section>
