@@ -9,6 +9,7 @@ using Pacevite.Api.Features.Events.GetEventById;
 using Pacevite.Api.Features.Events.GetEvents;
 using Pacevite.Api.Features.Events.GetPersonalBests;
 using Pacevite.Api.Features.Events.GetPrediction;
+using Pacevite.Api.Features.Events.GetTimeline;
 using Pacevite.Api.Features.Events.PredictionCoaching;
 using Pacevite.Api.Features.Events.Upload;
 
@@ -22,6 +23,7 @@ public static class EventEndpoints
         app.MapPost("/", CreateAsync).WithName("CreateEvent");
         app.MapGet("/", GetEventsAsync).WithName("GetEvents");
         app.MapGet("/personal-bests", GetPersonalBestsAsync).WithName("GetPersonalBests");
+        app.MapGet("/timeline", GetTimelineAsync).WithName("GetEventsTimeline");
         app.MapGet("/prediction", GetPredictionAsync).WithName("GetPrediction");
         app.MapGet("/prediction/coaching", GetPredictionCoachingAsync).WithName("GetPredictionCoaching");
         app.MapGet("/{id:guid}", GetEventByIdAsync).WithName("GetEventById");
@@ -104,6 +106,17 @@ public static class EventEndpoints
     {
         var userId = GetUserId(user);
         var result = await mediator.Send(new GetPersonalBestsQuery(userId), ct);
+        return TypedResults.Ok(result);
+    }
+
+    private static async Task<Ok<IReadOnlyList<TimelineEntryResponse>>> GetTimelineAsync(
+        ClaimsPrincipal user,
+        IMediator mediator,
+        CancellationToken ct,
+        string? eventType = null)
+    {
+        var userId = GetUserId(user);
+        var result = await mediator.Send(new GetTimelineQuery(userId, eventType), ct);
         return TypedResults.Ok(result);
     }
 
