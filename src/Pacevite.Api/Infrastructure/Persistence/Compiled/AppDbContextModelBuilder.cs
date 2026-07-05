@@ -12,7 +12,7 @@ namespace Pacevite.Api.Infrastructure.Persistence.Compiled
     public partial class AppDbContextModel
     {
         private AppDbContextModel()
-            : base(skipDetectChanges: false, modelId: new Guid("8b0a495f-cf6a-4d5c-86e9-0489bae14d1b"), entityTypeCount: 11)
+            : base(skipDetectChanges: false, modelId: new Guid("26f71883-6b61-435e-875b-f610d2937d77"), entityTypeCount: 11)
         {
         }
 

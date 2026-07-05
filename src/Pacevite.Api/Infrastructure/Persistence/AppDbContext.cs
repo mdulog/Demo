@@ -50,7 +50,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
                 .HasMethod("GIN");
 
             entity.HasIndex(e => new { e.UserId, e.EventType });
-            entity.HasIndex(e => new { e.UserId, e.EventDate });
+            // Id tiebreaker makes the keyset ORDER BY (EventDate DESC, Id DESC) fully index-served.
+            // Postgres btree scans backwards, so ASC columns serve the DESC walk.
+            entity.HasIndex(e => new { e.UserId, e.EventDate, e.Id });
 
             entity.HasMany(e => e.Splits)
                 .WithOne(s => s.Event)

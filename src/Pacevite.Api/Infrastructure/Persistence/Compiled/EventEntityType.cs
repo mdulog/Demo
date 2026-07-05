@@ -193,10 +193,10 @@ namespace Pacevite.Api.Infrastructure.Persistence.Compiled
                 new[] { syncConnectionId });
 
             var index1 = runtimeEntityType.AddIndex(
-                new[] { userId, eventDate });
+                new[] { userId, eventType });
 
             var index2 = runtimeEntityType.AddIndex(
-                new[] { userId, eventType });
+                new[] { userId, eventDate, id });
 
             return runtimeEntityType;
         }
