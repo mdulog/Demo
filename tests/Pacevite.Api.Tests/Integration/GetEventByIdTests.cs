@@ -1,6 +1,8 @@
+using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -170,5 +172,92 @@ public sealed class GetEventByIdTests : IAsyncDisposable
     {
         var response = await _client.GetAsync($"/api/events/{Guid.NewGuid()}");
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+    }
+
+    [Test]
+    public async Task detail_includes_average_splits_across_same_type_finished_events()
+    {
+        // Arrange — two HYROX events sharing the "SkiErg" label: (300 + 400) / 2 = 350
+        var token = await GetTokenAsync("avg-splits@example.com");
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        const string json = """
+            [
+              {
+                "event_type": "HYROX", "event_name": "HYROX Berlin", "event_date": "2024-11-10",
+                "completion": "FINISHED", "elapsed_secs": 5400,
+                "splits": [{ "split_type": "STATION", "split_label": "SkiErg", "split_secs": 300, "cumulative_secs": 300 }]
+              },
+              {
+                "event_type": "HYROX", "event_name": "HYROX Hamburg", "event_date": "2025-02-15",
+                "completion": "FINISHED", "elapsed_secs": 5600,
+                "splits": [{ "split_type": "STATION", "split_label": "SkiErg", "split_secs": 400, "cumulative_secs": 400 }]
+              }
+            ]
+            """;
+        var uploadResponse = await _client.PostAsync("/api/events/upload", BuildJsonUpload(json));
+        var uploaded = await uploadResponse.Content.ReadFromJsonAsync<List<EventResponse>>();
+
+        // Act
+        var detail = await _client.GetFromJsonAsync<EventDetailResponse>($"/api/events/{uploaded![0].Id}");
+
+        // Assert
+        await Assert.That(detail!.AverageSplits.Count).IsEqualTo(1);
+        await Assert.That(detail.AverageSplits[0].Label).IsEqualTo("SkiErg");
+        await Assert.That(detail.AverageSplits[0].AvgSecs).IsEqualTo(350);
+    }
+
+    [Test]
+    public async Task average_splits_exclude_non_finished_events()
+    {
+        // Arrange — the DNF's 900s SkiErg must not drag the average
+        var token = await GetTokenAsync("avg-dnf@example.com");
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        const string json = """
+            [
+              {
+                "event_type": "HYROX", "event_name": "Good Race", "event_date": "2024-11-10",
+                "completion": "FINISHED", "elapsed_secs": 5400,
+                "splits": [{ "split_type": "STATION", "split_label": "SkiErg", "split_secs": 300, "cumulative_secs": 300 }]
+              },
+              {
+                "event_type": "HYROX", "event_name": "Bad Day", "event_date": "2025-02-15",
+                "completion": "DNF", "elapsed_secs": 900,
+                "splits": [{ "split_type": "STATION", "split_label": "SkiErg", "split_secs": 900, "cumulative_secs": 900 }]
+              }
+            ]
+            """;
+        var uploadResponse = await _client.PostAsync("/api/events/upload", BuildJsonUpload(json));
+        var uploaded = await uploadResponse.Content.ReadFromJsonAsync<List<EventResponse>>();
+        var finishedId = uploaded!.Single(e => e.EventName == "Good Race").Id;
+
+        // Act
+        var detail = await _client.GetFromJsonAsync<EventDetailResponse>($"/api/events/{finishedId}");
+
+        // Assert
+        await Assert.That(detail!.AverageSplits.Single(a => a.Label == "SkiErg").AvgSecs).IsEqualTo(300);
+    }
+
+    [Test]
+    public async Task average_splits_is_empty_when_no_same_type_event_has_splits()
+    {
+        // Arrange
+        var token = await GetTokenAsync("avg-empty@example.com");
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        const string csv = "MARATHON,No Splits Race,2024-09-29,FINISHED,14400";
+        var content = new MultipartFormDataContent();
+        var fileContent = new ByteArrayContent(Encoding.UTF8.GetBytes(csv));
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
+        content.Add(fileContent, "file", "events.csv");
+        var uploadResponse = await _client.PostAsync("/api/events/upload", content);
+        var uploaded = await uploadResponse.Content.ReadFromJsonAsync<List<EventResponse>>();
+
+        // Act
+        var detail = await _client.GetFromJsonAsync<EventDetailResponse>($"/api/events/{uploaded![0].Id}");
+
+        // Assert
+        await Assert.That(detail!.AverageSplits.Count).IsEqualTo(0);
     }
 }

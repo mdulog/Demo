@@ -133,7 +133,7 @@ public static class EventEndpoints
         return TypedResults.NoContent();
     }
 
-    private static async Task<Results<Ok<EventResponse>, NotFound>> GetEventByIdAsync(
+    private static async Task<Results<Ok<EventDetailResponse>, NotFound>> GetEventByIdAsync(
         Guid id,
         ClaimsPrincipal user,
         IMediator mediator,
